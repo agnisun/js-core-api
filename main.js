@@ -4,6 +4,7 @@ const inputSearch = document.getElementById('input-search')
 const mainList = document.getElementById('main-list')
 const dropdown = document.getElementById('dropdown')
 const repositories = new Map()
+let isClear = true
 
 const closeDropDown = () => {
   while (dropdown.firstChild) {
@@ -50,27 +51,33 @@ const addRepository = (event) => {
 }
 
 const fetchRepositories = debounce(async (value) => {
-  if (!value) return
+  if (!value) {
+    closeDropDown()
+    return
+  }
 
   const response = await fetch('https://api.github.com/search/repositories?q=' + value)
   const data = await response.json()
 
   closeDropDown()
 
-  data.items?.forEach(item => {
-    const element = document.createElement('li')
-    element.setAttribute('data-value', JSON.stringify({ name: item.name, owner: item.owner.login, stars: item.stargazers_count, id: item.id }))
-    element.classList.add('header-dropdown__item')
-    element.addEventListener('click', addRepository)
+  if (!isClear)
+    data.items?.forEach(item => {
+      const element = document.createElement('li')
+      element.setAttribute('data-value', JSON.stringify({ name: item.name, owner: item.owner.login, stars: item.stargazers_count, id: item.id }))
+      element.classList.add('header-dropdown__item')
+      element.addEventListener('click', addRepository)
 
-    element.textContent = item.name
-    dropdown.append(element)
-  })
+      element.textContent = item.name
+      dropdown.append(element)
+    })
 }, 400)
 
 inputSearch.addEventListener('input', (event) => {
   const value = event.target.value.trim()
 
+  isClear = !value.length
+  
   fetchRepositories(value)
 })
 

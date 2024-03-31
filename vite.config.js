@@ -1,5 +1,5 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
-    name: '/'
+    base: '/js-core-api'
 })
